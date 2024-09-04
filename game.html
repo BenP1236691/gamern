@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNG Multiplayer Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>RNG Multiplayer Game</h1>
+        <div id="game-area">
+            <p id="roll-result">Click the button to roll!</p>
+            <button id="roll-button">Roll</button>
+        </div>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboard-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const authToken = localStorage.getItem('authToken');
+        const rollButton = document.getElementById('roll-button');
+        const rollResult = document.getElementById('roll-result');
+        const leaderboardList = document.getElementById('leaderboard-list');
+
+        // Fetch available items from the server and display on the game page
+        async function fetchItems() {
+            const response = await fetch('http://140.119.190.39:938/items', {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                console.log('Available items:', data.items);
+            } else {
+                alert('Failed to fetch items: ' + data.message);
+            }
+        }
+
+        // Roll for an item
+        rollButton.addEventListener('click', async () => {
+            const response = await fetch('http://140.119.190.39:938/roll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                rollResult.textContent = `You rolled a ${data.item}!`;
+                updateLeaderboard(data.leaderboard);
+            } else {
+                alert('Failed to roll: ' + data.message);
+            }
+        });
+
+        // Update leaderboard
+        function updateLeaderboard(leaderboard) {
+            leaderboardList.innerHTML = '';
+            leaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${entry.player} rolled ${entry.item}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // Fetch the initial items on page load
+        fetchItems();
+    </script>
+</body>
+</html>

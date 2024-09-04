@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - RNG Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+
+        <!-- Add Item Section -->
+        <div>
+            <h3>Add New Item</h3>
+            <input type="text" id="new-item-name" placeholder="Item Name" required>
+            <input type="number" id="new-item-chance" placeholder="Chance (in %)" required>
+            <button id="add-item-button">Add Item</button>
+        </div>
+
+        <!-- Remove Item Section -->
+        <div>
+            <h3>Remove Item</h3>
+            <input type="text" id="remove-item-name" placeholder="Item Name" required>
+            <button id="remove-item-button">Remove Item</button>
+        </div>
+
+        <!-- Grant Luck Boost Section -->
+        <div>
+            <h3>Grant Luck Boost</h3>
+            <input type="text" id="player-boost-name" placeholder="Player Name" required>
+            <input type="number" id="luck-boost" placeholder="Luck Boost (%)" required>
+            <button id="grant-boost-button">Grant Boost</button>
+        </div>
+
+        <!-- Remove Luck Boost Section -->
+        <div>
+            <h3>Remove Luck Boost</h3>
+            <input type="text" id="remove-boost-name" placeholder="Player Name" required>
+            <button id="remove-boost-button">Remove Boost</button>
+        </div>
+
+        <script>
+            const authToken = localStorage.getItem('authToken');
+
+            async function checkAdminAccess() {
+                const response = await fetch('http://140.119.190.39:938/admin/check', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!data.isAdmin) {
+                    alert('Access denied! Only admins are allowed here.');
+                    window.location.href = 'index.html';
+                }
+            }
+
+            // Call the admin check function when the page loads
+            checkAdminAccess();
+
+            // Add new item
+            document.getElementById('add-item-button').addEventListener('click', async () => {
+                const itemName = document.getElementById('new-item-name').value;
+                const itemChance = document.getElementById('new-item-chance').value;
+
+                const response = await fetch('http://140.119.190.39:938/admin/add-item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ itemName, itemChance })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Item added successfully!');
+                } else {
+                    alert('Failed to add item: ' + data.message);
+                }
+            });
+
+            // Remove item
+            document.getElementById('remove-item-button').addEventListener('click', async () => {
+                const itemName = document.getElementById('remove-item-name').value;
+
+                const response = await fetch('http://140.119.190.39:938/admin/remove-item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ itemName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Item removed successfully!');
+                } else {
+                    alert('Failed to remove item: ' + data.message);
+                }
+            });
+
+            // Grant luck boost
+            document.getElementById('grant-boost-button').addEventListener('click', async () => {
+                const playerName = document.getElementById('player-boost-name').value;
+                const luckBoost = document.getElementById('luck-boost').value;
+
+                const response = await fetch('http://140.119.190.39:938/admin/grant-boost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ playerName, luckBoost })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Luck boost granted successfully!');
+                } else {
+                    alert('Failed to grant luck boost: ' + data.message);
+                }
+            });
+
+            // Remove luck boost
+            document.getElementById('remove-boost-button').addEventListener('click', async () => {
+                const playerName = document.getElementById('remove-boost-name').value;
+
+                const response = await fetch('http://140.119.190.39:938/admin/remove-boost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ playerName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Luck boost removed successfully!');
+                } else {
+                    alert('Failed to remove luck boost: ' + data.message);
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
